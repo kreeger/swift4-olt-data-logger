@@ -38,10 +38,9 @@ class DataEntryEditViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        switch (traitCollection.horizontalSizeClass, traitCollection.verticalSizeClass) {
-        case (.regular, .regular):
+        if popoverPresentationController != nil {
             navigationItem.leftBarButtonItem = nil
-        default:
+        } else {
             navigationItem.leftBarButtonItem = cancelButton
         }
     }
