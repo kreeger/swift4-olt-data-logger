@@ -9,37 +9,40 @@
 import UIKit
 
 class DetailViewController: UIViewController {
+    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var bodyLabel: UILabel!
+    
+    private(set) var isDisplayingEntry: Bool = false
+    
+    private lazy var dateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .long
+        df.timeStyle = .medium
+        return df
+    }()
 
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
-
-
-    func configureView() {
-        // Update the user interface for the detail item.
-        if let detail = detailItem {
-            if let label = detailDescriptionLabel {
-                label.text = detail.description
-            }
-        }
-    }
+    
+    // MARK: Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        configureView()
+        configure(for: nil)
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    var detailItem: NSDate? {
-        didSet {
-            // Update the view.
-            configureView()
+    
+    
+    // MARK: Public functions
+    
+    func configure(for dataEntry: DataEntry?) {
+        isDisplayingEntry = dataEntry != nil
+        
+        loadViewIfNeeded()
+        bodyLabel.text = dataEntry?.content
+        if let date = dataEntry?.created {
+            dateLabel.text = dateFormatter.string(from: date)
+        } else {
+            dateLabel.text = nil
         }
     }
-
-
 }
 

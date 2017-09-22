@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C3633E1B1F741F5A00097270 /* DataEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3633E1A1F741F5A00097270 /* DataEntry.swift */; };
+		C3633E1E1F741FC800097270 /* DataEntryDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3633E1D1F741FC800097270 /* DataEntryDataSource.swift */; };
+		C3633E201F7429CE00097270 /* DataEntryEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3633E1F1F7429CE00097270 /* DataEntryEditViewController.swift */; };
 		C392D1381F740BEA007ADD16 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392D1371F740BEA007ADD16 /* AppDelegate.swift */; };
 		C392D13A1F740BEA007ADD16 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392D1391F740BEA007ADD16 /* MasterViewController.swift */; };
 		C392D13C1F740BEA007ADD16 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C392D13B1F740BEA007ADD16 /* DetailViewController.swift */; };
@@ -16,6 +19,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C3633E1A1F741F5A00097270 /* DataEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataEntry.swift; sourceTree = "<group>"; };
+		C3633E1D1F741FC800097270 /* DataEntryDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataEntryDataSource.swift; sourceTree = "<group>"; };
+		C3633E1F1F7429CE00097270 /* DataEntryEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataEntryEditViewController.swift; sourceTree = "<group>"; };
 		C392D1341F740BEA007ADD16 /* DataLogger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DataLogger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C392D1371F740BEA007ADD16 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C392D1391F740BEA007ADD16 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -53,8 +59,25 @@
 			children = (
 				C392D1391F740BEA007ADD16 /* MasterViewController.swift */,
 				C392D13B1F740BEA007ADD16 /* DetailViewController.swift */,
+				C3633E1F1F7429CE00097270 /* DataEntryEditViewController.swift */,
 			);
 			path = "View Controllers";
+			sourceTree = "<group>";
+		};
+		C3633E191F741F4C00097270 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C3633E1A1F741F5A00097270 /* DataEntry.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C3633E1C1F741FAC00097270 /* Logic */ = {
+			isa = PBXGroup;
+			children = (
+				C3633E1D1F741FC800097270 /* DataEntryDataSource.swift */,
+			);
+			path = Logic;
 			sourceTree = "<group>";
 		};
 		C392D12B1F740BEA007ADD16 = {
@@ -77,6 +100,8 @@
 		C392D1361F740BEA007ADD16 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				C3633E1C1F741FAC00097270 /* Logic */,
+				C3633E191F741F4C00097270 /* Models */,
 				C32448841F740C6F00892EFD /* View Controllers */,
 				C392D1371F740BEA007ADD16 /* AppDelegate.swift */,
 			);
@@ -157,7 +182,10 @@
 			files = (
 				C392D13C1F740BEA007ADD16 /* DetailViewController.swift in Sources */,
 				C392D13A1F740BEA007ADD16 /* MasterViewController.swift in Sources */,
+				C3633E1B1F741F5A00097270 /* DataEntry.swift in Sources */,
+				C3633E201F7429CE00097270 /* DataEntryEditViewController.swift in Sources */,
 				C392D1381F740BEA007ADD16 /* AppDelegate.swift in Sources */,
+				C3633E1E1F741FC800097270 /* DataEntryDataSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

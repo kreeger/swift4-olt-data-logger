@@ -9,21 +9,44 @@
 import UIKit
 
 class MasterViewController: UITableViewController {
-
-    var detailViewController: DetailViewController? = nil
-    var objects = [Any]()
-
+    enum Segue: String {
+        case showDetail
+        case showCreate
+        
+        init(segue: UIStoryboardSegue) {
+            self.init(rawValue: segue.identifier!)!
+        }
+    }
+    
+    var detailViewController: DetailViewController?
+    var dataSource: DataEntryDataSource!
+    
+    private lazy var dateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .short
+        df.timeStyle = .medium
+        return df
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "All", style: .plain, target: nil, action: nil)
+        
+        dataSource.fetchEntries { [weak self] error in
+            if let error = error {
+                self?.displayError(error)
+                return
+            }
+            
+            self?.tableView.reloadData()
+        }
+        
         navigationItem.leftBarButtonItem = editButtonItem
-
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(insertNewObject(_:)))
-        navigationItem.rightBarButtonItem = addButton
+        
         if let split = splitViewController {
             let controllers = split.viewControllers
-            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+            detailViewController = (controllers.last as! UINavigationController).topViewController as? DetailViewController
         }
     }
 
@@ -31,65 +54,100 @@ class MasterViewController: UITableViewController {
         clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
         super.viewWillAppear(animated)
     }
+    
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    @objc
-    func insertNewObject(_ sender: Any) {
-        objects.insert(NSDate(), at: 0)
-        let indexPath = IndexPath(row: 0, section: 0)
-        tableView.insertRows(at: [indexPath], with: .automatic)
-    }
-
-    // MARK: - Segues
+    // MARK: Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showDetail" {
-            if let indexPath = tableView.indexPathForSelectedRow {
-                let object = objects[indexPath.row] as! NSDate
-                let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-                controller.detailItem = object
-                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-                controller.navigationItem.leftItemsSupplementBackButton = true
-            }
+        super.prepare(for: segue, sender: sender)
+        
+        switch Segue(segue: segue) {
+        case .showCreate:
+            let navVC = segue.destination as! UINavigationController
+            let controller = navVC.topViewController as! DataEntryEditViewController
+            controller.delegate = self
+            
+        case .showDetail:
+            guard
+                let indexPath = tableView.indexPathForSelectedRow,
+                let object = dataSource.entry(at: indexPath.row)
+                else { return }
+            
+            let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
+            controller.configure(for: object)
+            controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
+            controller.navigationItem.leftItemsSupplementBackButton = true
         }
     }
-
-    // MARK: - Table View
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+    
+    @IBAction func prepareForUnwind(_ segue: UIStoryboardSegue?) {
+        print("Unwinding from create.")
     }
 
+    
+    // MARK: UITableViewController
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return objects.count
+        return dataSource.numberOfEntries
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-
-        let object = objects[indexPath.row] as! NSDate
-        cell.textLabel!.text = object.description
+        if let object = dataSource.entry(at: indexPath.row) {
+            cell.detailTextLabel?.text = dateFormatter.string(from: object.created)
+                cell.textLabel?.text = object.content
+        }
         return cell
     }
 
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
         return true
     }
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            objects.remove(at: indexPath.row)
+        switch editingStyle {
+        case .delete:
+            guard let entry = dataSource.entry(at: indexPath.row) else { return }
+            dataSource.delete(entry) { [weak self] error in
+                if let error = error {
+                    tableView.insertRows(at: [indexPath], with: .fade)
+                    self?.displayError(error)
+                    return
+                }
+            }
             tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+        default:
+            break
         }
     }
 
 
+    // MARK: Private functions
+    
+    private func displayError(_ error: Error) {
+        print(error.localizedDescription)
+        let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Okay", style: .default) { [weak self] _ in self?.dismiss(animated: true, completion: nil) })
+        present(alert, animated: true, completion: nil)
+    }
+}
+
+
+extension MasterViewController: DataEntryEditViewControllerDelegate {
+    func dataEntryEditViewController(_ viewController: DataEntryEditViewController, wantsToCreateDataEntryWith bodyCopy: String) {
+        let newEntry = DataEntry(content: bodyCopy, created: Date())
+        dataSource.commit(newEntry) { [weak self] newIndex, error in
+            if let error = error {
+                self?.displayError(error)
+                return
+            }
+            
+            let indexPath = IndexPath(row: newIndex, section: 0)
+            self?.tableView.insertRows(at: [indexPath], with: .fade)
+            self?.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .top)
+            self?.performSegue(withIdentifier: Segue.showDetail.rawValue, sender: nil)
+            self?.dismiss(animated: true, completion: nil)
+        }
+    }
 }
 
